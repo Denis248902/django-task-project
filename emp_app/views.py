@@ -5,7 +5,9 @@ from django.shortcuts import render, get_object_or_404
 from .models import EmployeeProfile, EmployeeImage
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.views.decorators.cache import cache_page
 
+@cache_page(60)  # Кэш на 60 секунд
 def employee_list(request):
     query = request.GET.get('q', '')
     employees = EmployeeProfile.objects.all()
