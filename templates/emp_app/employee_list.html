@@ -3,15 +3,43 @@
 {% block content %}
 <h1>Сотрудники</h1>
 
+<div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+  <!-- Поиск -->
+  <form method="get" action="{% url 'employee_list' %}" style="display: flex; gap: 8px; align-items: center;">
+    <input type="text" name="q" value="{{ query }}" placeholder="Поиск по имени или должности..." style="padding: 6px; width: 300px;">
+    <button type="submit" class="btn">Найти</button>
+    {% if query %}
+      <a href="{% url 'employee_list' %}" class="btn" style="background: #6c757d;">Сбросить</a>
+    {% endif %}
+  </form>
+
+  <!-- Кнопка CSV -->
+  <a href="{% url 'export_employees_csv' %}" class="btn" style="background: #28a745;">📥 Скачать CSV</a>
+</div>
+
 <div class="employee-grid">
-  {% for emp in employees %}
+  {% for emp in page_obj %}
   <div class="card">
     <h3>{{ emp.full_name }}</h3>
     <p><strong>Должность:</strong> {{ emp.position }}</p>
     <a href="{% url 'employee_detail' pk=emp.pk %}" class="btn">Подробнее</a>
   </div>
   {% empty %}
-  <p>Нет сотрудников.</p>
+  <p>Сотрудники не найдены.</p>
   {% endfor %}
 </div>
+
+{% if page_obj.has_other_pages %}
+  <nav style="margin-top: 20px; text-align: center;">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="btn">← Предыдущая</a>
+    {% endif %}
+
+    <span style="margin: 0 8px;">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="btn">Следующая →</a>
+    {% endif %}
+  </nav>
+{% endif %}
 {% endblock %}
