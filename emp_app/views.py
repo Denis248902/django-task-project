@@ -1,13 +1,25 @@
 from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from .models import EmployeeProfile, EmployeeSkill, EmployeeImage
 
 def employee_list(request):
     employees = EmployeeProfile.objects.all()
+    query = request.GET.get('q', '')
+
+    if query:
+        employees = employees.filter(
+            full_name__icontains=query
+        ) | employees.filter(
+            position__icontains=query
+        )
+
     return render(request, 'emp_app/employee_list.html', {
         'employees': employees,
-        'page_title': 'Список сотрудников'
+        'page_title': 'Список сотрудников',
+        'query': query,
     })
 
+@login_required(login_url='login')
 def employee_detail(request, pk):
     employee = get_object_or_404(EmployeeProfile, pk=pk)
     skills_with_levels = employee.employeeskill_set.select_related('skill').all()
@@ -17,5 +29,5 @@ def employee_detail(request, pk):
         'employee': employee,
         'skills_with_levels': skills_with_levels,
         'images': images,
-        'page_title': f'Карточка: {employee.full_name}'
+        'page_title': f'Карточка: {employee.full_name}',
     })
