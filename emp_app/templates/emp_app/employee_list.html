@@ -3,23 +3,17 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
-<h2>{{ page_title }}</h2>
+<h1>{{ page_title }}</h1>
 
 <div class="cards-grid">
-  {% for emp in employees %}
-    <div class="card">
-      <h3>{{ emp.full_name }}</h3>
-      <p><strong>Пол:</strong> {% if emp.gender == 'M' %}Мужской{% else %}Женский{% endif %}</p>
-      <p><strong>Навыки:</strong></p>
-      <ul>
-        {% for es in emp.skills.all %}
-          <li>{{ es.skill.name }} ({{ es.level }}/5)</li>
-        {% empty %}
-          <li>Нет навыков</li>
-        {% endfor %}
-      </ul>
-      <a href="{% url 'employee_detail' emp.pk %}" class="btn">Перейти к карточке</a>
-    </div>
+  {% for employee in employees %}
+  <div class="card">
+    <h3>{{ employee.full_name }}</h3>
+    <p><strong>Должность:</strong> {{ employee.position|default:"Не указана" }}</p>
+    <a href="{% url 'employee_detail' employee.pk %}" class="btn">Подробнее</a>
+  </div>
+  {% empty %}
+  <p>Нет сотрудников.</p>
   {% endfor %}
 </div>
 {% endblock %}
