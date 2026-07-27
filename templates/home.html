@@ -1,23 +1,16 @@
 {% extends 'base.html' %}
-{% block title %}Главная — Django Task Project{% endblock %}
+{% block title %}Главная{% endblock %}
 {% block content %}
-<h1>О проекте</h1>
-<p>Это учебный проект на Django.</p>
-<h2>Наши сотрудники</h2>
-<div class="employee-cards">
-    {% for emp in employees %}
-    <div class="card">
-        <h3>{{ emp.first_name }} {{ emp.last_name }}</h3>
-        <p>Пол: {{ emp.get_gender_display }}</p>
-        <p>Навыки: 
-            {% for es in emp.employee_skills.all %}
-                {{ es.skill.name }} ({{ es.level }}), 
-            {% endfor %}
-        </p>
-        <a href="{% url 'employee_detail' emp.pk %}">Подробнее →</a>
-    </div>
-    {% empty %}
-    <p>Сотрудников пока нет.</p>
-    {% endfor %}
+<h1>Наши сотрудники</h1>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;">
+  {% for emp in employees %}
+  <div style="border:1px solid #ccc; padding:12px; border-radius:8px;">
+    <h3>{{ emp.full_name }}</h3>
+    <p>{{ emp.position|default:"Без должности" }}</p>
+    <a href="{% url 'employees:employee_detail' emp.pk %}">Подробнее</a>
+  </div>
+  {% empty %}
+  <p>Нет сотрудников.</p>
+  {% endfor %}
 </div>
 {% endblock %}

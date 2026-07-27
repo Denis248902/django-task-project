@@ -1,21 +1,14 @@
 {% extends 'base.html' %}
-{% block title %}Список сотрудников — Django Task Project{% endblock %}
+{% block title %}Список сотрудников{% endblock %}
 {% block content %}
-<h1>Список сотрудников</h1>
-<div class="employee-cards">
-    {% for emp in employees %}
-    <div class="card">
-        <h3>{{ emp.first_name }} {{ emp.last_name }}</h3>
-        <p>Пол: {{ emp.get_gender_display }}</p>
-        <p>Навыки: 
-            {% for es in emp.employee_skills.all %}
-                {{ es.skill.name }} ({{ es.level }}), 
-            {% endfor %}
-        </p>
-        <a href="{% url 'employee_detail' emp.pk %}">Подробнее →</a>
-    </div>
-    {% empty %}
-    <p>Сотрудников пока нет.</p>
-    {% endfor %}
-</div>
+<h1>Все сотрудники</h1>
+<ul>
+  {% for emp in employees %}
+  <li>
+    <a href="{% url 'employees:employee_detail' emp.pk %}">{{ emp.full_name }} ({{ emp.position }})</a>
+  </li>
+  {% empty %}
+  <li>Нет сотрудников.</li>
+  {% endfor %}
+</ul>
 {% endblock %}

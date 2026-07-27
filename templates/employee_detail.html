@@ -1,31 +1,25 @@
 {% extends 'base.html' %}
-{% block title %}{{ employee.first_name }} {{ employee.last_name }} — Django Task Project{% endblock %}
+{% block title %}{{ employee.full_name }}{% endblock %}
 {% block content %}
-<h1>{{ employee.first_name }} {{ employee.last_name }}</h1>
-<p>Пол: {{ employee.get_gender_display }}</p>
+<h1>{{ employee.full_name }}</h1>
+<p><strong>Должность:</strong> {{ employee.position }}</p>
+<p><strong>Пол:</strong> {{ employee.get_gender_display }}</p>
 
 <h2>Навыки</h2>
 <ul>
-    {% for es in employee.employee_skills.all %}
-        <li>{{ es.skill.name }} — уровень {{ es.level }}
-            {% if es.description %}
-                <br><small>{{ es.description }}</small>
-            {% endif %}
-        </li>
-    {% empty %}
-    <li>Навыков пока нет.</li>
-    {% endfor %}
+  {% for item in skills %}
+  <li>{{ item.skill.name }} — уровень {{ item.level }}</li>
+  {% empty %}
+  <li>Навыков нет.</li>
+  {% endfor %}
 </ul>
 
 <h2>Галерея</h2>
-<div class="image-gallery">
-    {% for img in employee.images.all %}
-        <div class="image-item">
-            <img src="{{ img.image.url }}" alt="Фото {{ img.order }}" style="max-width: 200px;">
-            <p>Порядок: {{ img.order }}</p>
-        </div>
-    {% empty %}
-    <p>Фотографий пока нет.</p>
-    {% endfor %}
+<div style="display:flex; flex-wrap:wrap; gap:8px;">
+  {% for img in images %}
+  <img src="{{ img.image.url }}" alt="Фото {{ img.order }}" style="max-width:150px;">
+  {% empty %}
+  <p>Фото нет.</p>
+  {% endfor %}
 </div>
 {% endblock %}

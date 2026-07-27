@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}{{ employee.full_name }}{% endblock %}
+
+{% block content %}
+<h2>{{ employee.full_name }}</h2>
+<p>{{ employee.position }}</p>
+
+<h3>Галерея фотографий</h3>
+<div class="gallery-grid">
+    {% for img in images %}
+        <div class="photo-item">
+            <img src="{{ img.image.url }}" alt="Photo {{ img.order_index }}">
+            <p>№{{ img.order_index }}</p>
+        </div>
+    {% empty %}
+        <p>Нет фотографий.</p>
+    {% endfor %}
+</div>
+{% endblock %}
