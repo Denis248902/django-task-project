@@ -1,13 +1,13 @@
 import csv
 from io import StringIO
-from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import EmployeeProfile, EmployeeImage
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.views.decorators.cache import cache_page
 
-@cache_page(60)  # Кэш на 60 секунд
+@cache_page(60)
 def employee_list(request):
     query = request.GET.get('q', '')
     employees = EmployeeProfile.objects.all()
@@ -34,6 +34,42 @@ def employee_detail(request, pk):
         'employee': employee,
         'images': images,
     })
+
+def employee_upload_photo(request, pk):
+    if request.method != 'POST':
+        return redirect('employee_detail', pk=pk)
+
+    employee = get_object_or_404(EmployeeProfile, pk=pk)
+    image_file = request.FILES.get('image')
+
+    # Валидация: файл должен быть
+    if not image_file:
+        # Можно вернуть ошибку или редирект с сообщением — здесь просто редирект
+        return redirect('employee_detail', pk=pk)
+
+    # Валидация типа MIME
+    allowed_types = ['image/jpeg', 'image/png', 'image/gif']
+    if image_file.content_type not in allowed_types:
+        # В реальном проекте лучше передавать сообщение через messages framework
+        return HttpResponseBadRequest("Ошибка: разрешены только JPG, PNG, GIF.")
+
+    # Валидация размера (макс. 5 МБ)
+    max_size_bytes = 5 * 1024 * 1024
+    if image_file.size > max_size_bytes:
+        return HttpResponseBadRequest(f"Ошибка: файл слишком большой. Максимум {max_size_bytes / 1024 / 1024} МБ.")
+
+    order_index = request.POST.get('order_index', 0)
+    try:
+        order_index = int(order_index) if order_index.isdigit() else 0
+    except ValueError:
+        order_index = 0
+
+    EmployeeImage.objects.create(
+        employee=employee,
+        image=image_file,
+        order_index=order_index
+    )
+    return redirect('employee_detail', pk=pk)
 
 def export_employees_csv(request):
     response = HttpResponse(content_type='text/csv')

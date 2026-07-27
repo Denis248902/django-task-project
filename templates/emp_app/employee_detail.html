@@ -9,13 +9,29 @@
 <div class="image-gallery">
   {% for img in images %}
   <div class="photo-item">
-    <img src="/media/{{ img.image }}" alt="Фото {{ forloop.counter }}">
+    <img src="{{ img.image.url }}" alt="Фото #{{ img.order_index }}" style="max-width:150px;">
     <p>Порядок: {{ img.order_index }}</p>
   </div>
   {% empty %}
   <p>Фото нет.</p>
   {% endfor %}
 </div>
+
+<!-- Форма загрузки фото с подсказками -->
+<h3>Загрузить новое фото</h3>
+<form action="{% url 'employee_upload_photo' pk=employee.pk %}" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input type="file" name="image" accept="image/*" required>
+  <p style="font-size: 0.9em; color: #666;">
+    Разрешены: JPG, PNG, GIF. Максимальный размер: 5 МБ.
+  </p>
+  <label>
+    Порядок (номер):
+    <input type="number" name="order_index" value="{{ images|length|add:'1' }}" min="0" placeholder="0">
+  </label>
+  <br><br>
+  <button type="submit" class="btn" style="background:#28a745;">Загрузить фото</button>
+</form>
 
 <a href="{% url 'employee_list' %}" class="btn">Назад к списку</a>
 {% endblock %}
