@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import EmployeeProfile, EmployeeSkill, EmployeeImage
+from .models import EmployeeProfile, EmployeeImage
 
 def employee_list(request):
     employees = EmployeeProfile.objects.all()
@@ -22,7 +22,8 @@ def employee_list(request):
 @login_required(login_url='login')
 def employee_detail(request, pk):
     employee = get_object_or_404(EmployeeProfile, pk=pk)
-    skills_with_levels = employee.employeeskill_set.select_related('skill').all()
+    # Используем правильное имя связи: skills (из related_name в модели)
+    skills_with_levels = employee.skills.select_related('skill').all()
     images = employee.images.order_by('order_index')
 
     return render(request, 'emp_app/employee_detail.html', {
