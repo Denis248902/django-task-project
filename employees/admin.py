@@ -1,24 +1,26 @@
 from django.contrib import admin
-from .models import Employee, EmployeeImage, Skill, EmployeeSkill
+from .models import EmployeeProfile, EmployeeImage, Skill, EmployeeSkillLevel
 
-class EmployeeImageInline(admin.TabularInline):
-    model = EmployeeImage
-    extra = 1
-    fields = ('image', 'order')
 
-class EmployeeSkillInline(admin.TabularInline):
-    model = EmployeeSkill
-    extra = 1
-    autocomplete_fields = ('skill',)
+@admin.register(EmployeeProfile)
+class EmployeeProfileAdmin(admin.ModelAdmin):
+    list_display = ('first_name', 'last_name', 'gender', 'user')
+    search_fields = ('first_name', 'last_name')
 
-@admin.register(Employee)
-class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('user', 'gender', 'last_name', 'first_name')
-    list_filter = ('gender',)
-    search_fields = ('user__username', 'last_name', 'first_name')
-    inlines = [EmployeeImageInline, EmployeeSkillInline]
+
+@admin.register(EmployeeImage)
+class EmployeeImageAdmin(admin.ModelAdmin):
+    list_display = ('employee', 'order')
+    list_filter = ('employee',)
+
 
 @admin.register(Skill)
 class SkillAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
+
+
+@admin.register(EmployeeSkillLevel)
+class EmployeeSkillLevelAdmin(admin.ModelAdmin):
+    list_display = ('employee', 'skill', 'level')
+    list_filter = ('skill',)
