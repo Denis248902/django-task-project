@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import EmployeeProfile, Skill, EmployeeSkill, EmployeeImage
+from .models import EmployeeProfile, EmployeeImage
 
 class EmployeeImageInline(admin.TabularInline):
     model = EmployeeImage
@@ -11,6 +11,3 @@ class EmployeeImageInline(admin.TabularInline):
 class EmployeeProfileAdmin(admin.ModelAdmin):
     list_display = ['full_name', 'position', 'gender']
     inlines = [EmployeeImageInline]
-
-admin.site.register(Skill)
-admin.site.register(EmployeeSkill)
