@@ -1,7 +1,8 @@
 import csv
 from io import StringIO
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
 from .models import EmployeeProfile, EmployeeImage
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -42,21 +43,19 @@ def employee_upload_photo(request, pk):
     employee = get_object_or_404(EmployeeProfile, pk=pk)
     image_file = request.FILES.get('image')
 
-    # Валидация: файл должен быть
     if not image_file:
-        # Можно вернуть ошибку или редирект с сообщением — здесь просто редирект
+        messages.error(request, "Файл не выбран.")
         return redirect('employee_detail', pk=pk)
 
-    # Валидация типа MIME
     allowed_types = ['image/jpeg', 'image/png', 'image/gif']
     if image_file.content_type not in allowed_types:
-        # В реальном проекте лучше передавать сообщение через messages framework
-        return HttpResponseBadRequest("Ошибка: разрешены только JPG, PNG, GIF.")
+        messages.error(request, "Ошибка: разрешены только JPG, PNG, GIF.")
+        return redirect('employee_detail', pk=pk)
 
-    # Валидация размера (макс. 5 МБ)
     max_size_bytes = 5 * 1024 * 1024
     if image_file.size > max_size_bytes:
-        return HttpResponseBadRequest(f"Ошибка: файл слишком большой. Максимум {max_size_bytes / 1024 / 1024} МБ.")
+        messages.error(request, f"Ошибка: файл слишком большой. Максимум 5 МБ.")
+        return redirect('employee_detail', pk=pk)
 
     order_index = request.POST.get('order_index', 0)
     try:
@@ -69,6 +68,7 @@ def employee_upload_photo(request, pk):
         image=image_file,
         order_index=order_index
     )
+    messages.success(request, "Фото успешно загружено!")
     return redirect('employee_detail', pk=pk)
 
 def export_employees_csv(request):

@@ -1,6 +1,23 @@
 {% extends "base.html" %}
 
 {% block content %}
+<!-- Блок сообщений -->
+{% if messages %}
+  <div style="margin-bottom: 16px;">
+    {% for message in messages %}
+      <div style="padding: 8px 12px; margin-bottom: 8px; border-radius: 4px; color: #fff;">
+        {% if message.tags == "error" %}
+          <strong style="color: #ffcccc;">❌ Ошибка:</strong> {{ message }}
+        {% elif message.tags == "success" %}
+          <strong style="color: #ccffcc;">✅</strong> {{ message }}
+        {% else %}
+          {{ message }}
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
 <h1>{{ employee.full_name }}</h1>
 <p><strong>Должность:</strong> {{ employee.position }}</p>
 <p><strong>Пол:</strong> {% if employee.gender == 'M' %}Мужской{% else %}Женский{% endif %}</p>
@@ -17,7 +34,7 @@
   {% endfor %}
 </div>
 
-<!-- Форма загрузки фото с подсказками -->
+<!-- Форма загрузки фото -->
 <h3>Загрузить новое фото</h3>
 <form action="{% url 'employee_upload_photo' pk=employee.pk %}" method="post" enctype="multipart/form-data">
   {% csrf_token %}
