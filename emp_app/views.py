@@ -1,12 +1,12 @@
 import csv
 from io import StringIO
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from .models import EmployeeProfile, EmployeeImage
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Count, Avg
 from django.views.decorators.cache import cache_page
+from .models import EmployeeProfile, EmployeeImage
 
 @cache_page(60)
 def employee_list(request):
@@ -59,7 +59,7 @@ def employee_upload_photo(request, pk):
 
     order_index = request.POST.get('order_index', 0)
     try:
-        order_index = int(order_index) if order_index.isdigit() else 0
+        order_index = int(order_index) if str(order_index).isdigit() else 0
     except ValueError:
         order_index = 0
 
@@ -84,3 +84,31 @@ def export_employees_csv(request):
         writer.writerow([emp.id, emp.full_name, gender_text, emp.position, photos])
 
     return response
+
+def employee_stats(request):
+    total_employees = EmployeeProfile.objects.count()
+    total_images = EmployeeImage.objects.count()
+    agg = EmployeeProfile.objects.annotate(img_count=Count('images')).aggregate(avg=Avg('img_count'))
+    avg_gallery_len = agg['avg'] or 0
+    top_employees = (
+        EmployeeProfile.objects.annotate(img_count=Count('images'))
+        .order_by('-img_count')[:3]
+    )
+
+    data = {
+        "total_employees": total_employees,
+        "total_images": total_images,
+        "average_gallery_length": round(float(avg_gallery_len), 2),
+        "top_employees": [
+            {"full_name": e.full_name, "image_count": e.img_count}
+            for e in top_employees
+        ],
+    }
+    return JsonResponse(data)
+
+def employee_report(request):
+    # Получаем JSON‑статистику
+    stats_response = employee_stats(request)
+    import json
+    data = json.loads(stats_response.content.decode('utf-8'))
+    return render(request, 'emp_app/report.html', data)
