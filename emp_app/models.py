@@ -30,3 +30,18 @@ class EmployeeSkill(models.Model):
 
     def __str__(self):
         return f"{self.employee.full_name} — {self.skill.name} (уровень {self.level})"
+
+class EmployeeImage(models.Model):
+    employee = models.ForeignKey(
+        EmployeeProfile,
+        related_name='images',
+        on_delete=models.CASCADE
+    )
+    image = models.ImageField(upload_to='employee_photos/', blank=True, null=True)
+    order_index = models.PositiveIntegerField(default=0, help_text="Порядок отображения фото")
+
+    class Meta:
+        ordering = ['order_index']
+
+    def __str__(self):
+        return f"Фото {self.order_index} для {self.employee.full_name}"
