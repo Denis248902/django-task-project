@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ employee.full_name }}</h1>
+<p><strong>Должность:</strong> {{ employee.position }}</p>
+<p><strong>Пол:</strong> {% if employee.gender == 'M' %}Мужской{% else %}Женский{% endif %}</p>
+
+<h2>Фотографии</h2>
+<div class="image-gallery">
+  {% for img in images %}
+  <div class="photo-item">
+    <img src="/media/{{ img.image }}" alt="Фото {{ forloop.counter }}">
+    <p>Порядок: {{ img.order_index }}</p>
+  </div>
+  {% empty %}
+  <p>Фото нет.</p>
+  {% endfor %}
+</div>
+
+<a href="{% url 'employee_list' %}" class="btn">Назад к списку</a>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Сотрудники</h1>
+
+<div class="employee-grid">
+  {% for emp in employees %}
+  <div class="card">
+    <h3>{{ emp.full_name }}</h3>
+    <p><strong>Должность:</strong> {{ emp.position }}</p>
+    <a href="{% url 'employee_detail' pk=emp.pk %}" class="btn">Подробнее</a>
+  </div>
+  {% empty %}
+  <p>Нет сотрудников.</p>
+  {% endfor %}
+</div>
+{% endblock %}
