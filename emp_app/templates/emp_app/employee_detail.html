@@ -1,20 +1,41 @@
 {% extends "base.html" %}
 
-{% block title %}{{ employee.full_name }}{% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
 <h2>{{ employee.full_name }}</h2>
-<p>{{ employee.position }}</p>
+<p><strong>Пол:</strong> {% if employee.gender == 'M' %}Мужской{% else %}Женский{% endif %}</p>
+<p><strong>Должность:</strong> {{ employee.position|default:"Не указана" }}</p>
+
+<h3>Навыки и уровни освоения</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Навык</th>
+      <th>Уровень освоения</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for es in skills_with_levels %}
+      <tr>
+        <td>{{ es.skill.name }}</td>
+        <td>{{ es.level }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="2">Нет навыков</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
 
 <h3>Галерея фотографий</h3>
 <div class="gallery-grid">
-    {% for img in images %}
-        <div class="photo-item">
-            <img src="{{ img.image.url }}" alt="Photo {{ img.order_index }}">
-            <p>№{{ img.order_index }}</p>
-        </div>
-    {% empty %}
-        <p>Нет фотографий.</p>
-    {% endfor %}
+  {% for img in images %}
+    <div class="photo-item">
+      <img src="{{ img.image.url }}" alt="Photo {{ img.order_index }}">
+      <p>№{{ img.order_index }}</p>
+    </div>
+  {% empty %}
+    <p>Нет фотографий.</p>
+  {% endfor %}
 </div>
 {% endblock %}

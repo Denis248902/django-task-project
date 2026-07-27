@@ -1,14 +1,25 @@
 {% extends "base.html" %}
 
-{% block title %}Сотрудники{% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
-<h2>Список сотрудников</h2>
-<ul>
-    {% for emp in employees %}
-        <li>
-            <a href="{% url 'employee_detail' emp.pk %}">{{ emp.full_name }}</a>
-        </li>
-    {% endfor %}
-</ul>
+<h2>{{ page_title }}</h2>
+
+<div class="cards-grid">
+  {% for emp in employees %}
+    <div class="card">
+      <h3>{{ emp.full_name }}</h3>
+      <p><strong>Пол:</strong> {% if emp.gender == 'M' %}Мужской{% else %}Женский{% endif %}</p>
+      <p><strong>Навыки:</strong></p>
+      <ul>
+        {% for es in emp.skills.all %}
+          <li>{{ es.skill.name }} ({{ es.level }}/5)</li>
+        {% empty %}
+          <li>Нет навыков</li>
+        {% endfor %}
+      </ul>
+      <a href="{% url 'employee_detail' emp.pk %}" class="btn">Перейти к карточке</a>
+    </div>
+  {% endfor %}
+</div>
 {% endblock %}

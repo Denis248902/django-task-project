@@ -1,16 +1,27 @@
-<!DOCTYPE html>
-<html>
-<head><title>Главная</title></head>
-<body>
-  <h1>Сотрудники</h1>
-  {% for p in profiles %}
-    <div style="border:1px solid #ccc; padding:10px; margin:10px;">
-      <h3>{{ p.first_name }} {{ p.last_name }}</h3>
-      <p>Пол: {{ p.get_gender_display }}</p>
-      <a href="{% url 'employee_detail' p.pk %}">Подробнее</a>
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<h2>{{ page_title }}</h2>
+<p>Добро пожаловать в кадровый портал. Здесь вы можете посмотреть карточки сотрудников, их навыки и уровни освоения.</p>
+
+<h3>Сотрудники</h3>
+<div class="cards-grid">
+  {% for emp in employees %}
+    <div class="card">
+      <h3>{{ emp.full_name }}</h3>
+      <p><strong>Должность:</strong> {{ emp.position|default:"Не указана" }}</p>
+      <p><strong>Навыки:</strong></p>
+      <ul>
+        {% for es in emp.skills.all %}
+          <li>{{ es.skill.name }} (уровень {{ es.level }})</li>
+        {% empty %}
+          <li>Нет навыков</li>
+        {% endfor %}
+      </ul>
+      <a href="{% url 'employee_detail' emp.pk %}" class="btn">Подробнее</a>
     </div>
-  {% empty %}
-    Нет сотрудников.
   {% endfor %}
-</body>
-</html>
+</div>
+{% endblock %}

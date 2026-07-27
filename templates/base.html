@@ -1,21 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>{% block title %}Сотрудники{% endblock %}</title>
+    <meta charset="UTF-8">
+    <title>{% block title %}Django Project{% endblock %}</title>
     {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-    <nav>
-        <a href="{% url 'employees:home' %}">Главная</a> |
-        <a href="{% url 'employees:employee_list' %}">Список сотрудников</a>
-        {% if user.is_authenticated %}
-            | Привет, {{ user.username }}
-        {% else %}
-            | <a href="/login/">Войти</a>
-        {% endif %}
-    </nav>
-    <hr>
-    {% block content %}{% endblock %}
+    <header>
+        <h1>Кадровый портал</h1>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
 </body>
 </html>
