@@ -1,11 +1,13 @@
 from django.db import models
-from employees.models import EmployeeProfile
+from employees.models import Employee
+
 
 class Workplace(models.Model):
     desk_number = models.CharField('номер стола', max_length=20, unique=True)
     extra_info = models.TextField('доп. информация', blank=True, null=True)
+
     employee = models.OneToOneField(
-        EmployeeProfile,
+        Employee,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

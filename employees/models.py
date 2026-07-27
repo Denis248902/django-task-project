@@ -1,42 +1,70 @@
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.contrib.auth.models import User
+from django.conf import settings
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
+
+GENDER_CHOICES = [
+    ('M', 'Мужской'),
+    ('F', 'Женский'),
+    ('O', 'Другой'),
+]
 
 class Skill(models.Model):
-    name = models.CharField('навык', max_length=50, unique=True)
+    name = models.CharField('Название навыка', max_length=100, unique=True)
+
+    class Meta:
+        verbose_name = 'Навык'
+        verbose_name_plural = 'Навыки'
 
     def __str__(self):
         return self.name
 
 
-class EmployeeProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='пользователь')
-    first_name = models.CharField('имя', max_length=30)
-    last_name = models.CharField('фамилия', max_length=30)
-    middle_name = models.CharField('отчество', max_length=30, blank=True, null=True)
-    # ВАЖНО: добавили default='M', чтобы старые записи не были NULL
-    gender = models.CharField(
-        'пол', 
-        max_length=1, 
-        choices=[('M', 'Мужской'), ('F', 'Женский')], 
-        default='M'
-    )
-    description = models.TextField('описание', blank=True, null=True)
-
-    def __str__(self):
-        return f"{self.first_name} {self.middle_name or ''} {self.last_name}".strip()
-
-
-class EmployeeSkillLevel(models.Model):
-    employee = models.ForeignKey(EmployeeProfile, on_delete=models.CASCADE, related_name='skills_levels')
-    skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
-    level = models.PositiveSmallIntegerField(
-        'уровень',
-        validators=[MinValueValidator(1), MaxValueValidator(10)]
-    )
+class EmployeeSkill(models.Model):
+    employee = models.ForeignKey('Employee', on_delete=models.CASCADE, related_name='employee_skills')
+    skill = models.ForeignKey(Skill, on_delete=models.CASCADE, related_name='employee_skills')
+    level = models.PositiveSmallIntegerField('Уровень освоения', default=1)
+    description = models.TextField('Описание', blank=True)
 
     class Meta:
+        verbose_name = 'Навык сотрудника'
+        verbose_name_plural = 'Навыки сотрудников'
         unique_together = ('employee', 'skill')
 
     def __str__(self):
-        return f"{self.employee} — {self.skill}: {self.level}"
+        return f'{self.employee} — {self.skill} (уровень {self.level})'
+
+
+class Employee(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
+    gender = models.CharField('Пол', max_length=1, choices=GENDER_CHOICES, blank=True)
+    first_name = models.CharField('Имя', max_length=150, blank=True)
+    last_name = models.CharField('Фамилия', max_length=150, blank=True)
+    middle_name = models.CharField('Отчество', max_length=150, blank=True)
+
+    class Meta:
+        verbose_name = 'Сотрудник'
+        verbose_name_plural = 'Сотрудники'
+
+    def __str__(self):
+        return f'{self.last_name} {self.first_name}'.strip()
+
+
+class EmployeeImage(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField('Изображение', upload_to='employee_images/')
+    order = models.PositiveIntegerField('Порядок', default=0)
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = 'Изображение сотрудника'
+        verbose_name_plural = 'Изображения сотрудников'
+
+    def __str__(self):
+        return f"Фото {self.order} для {self.employee}"
+
+
+@receiver(pre_delete, sender=EmployeeImage)
+def delete_image_file(sender, instance, **kwargs):
+    if instance.image:
+        instance.image.delete(save=False)
