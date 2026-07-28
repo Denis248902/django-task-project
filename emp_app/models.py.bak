@@ -1,0 +1,162 @@
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.conf import settings
+
+class EmployeeProfile(models.Model):
+    GENDER_CHOICES = [('M', 'Мужской'), ('F', 'Женский')]
+    full_name = models.CharField(max_length=255)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    position = models.CharField(max_length=255)
+
+    @property
+
+    def tenure_days(self):
+
+        from datetime import date
+
+        today = date.today()
+
+        if self.hire_date:
+
+            return (today - self.hire_date).days
+
+        return 0
+
+
+    def clean(self):
+
+        super().clean()
+
+        # Если стол не указан — валидацию не делаем
+
+        if not self.desk_number:
+
+            return
+
+
+
+        def is_tester(e):
+
+            return e.role == "tester"
+
+
+
+        def is_dev(e):
+
+            return e.role in ["backend", "frontend", "fullstack"]
+
+
+
+        current_is_tester = is_tester(self)
+
+        current_is_dev = is_dev(self)
+
+
+
+        others = EmployeeProfile.objects.exclude(pk=self.pk).filter(desk_number__isnull=False)
+
+        for other in others:
+
+            other_is_tester = is_tester(other)
+
+            other_is_dev = is_dev(other)
+
+
+
+            if (current_is_tester and other_is_dev) or (current_is_dev and other_is_tester):
+
+                if abs(self.desk_number - other.desk_number) <= 1:
+
+                    raise ValidationError(
+
+                        f"Нельзя сажать тестировщика и разработчика за соседние столы. "
+
+                        f"Конфликт со столом {other.desk_number} ({other.full_name})."
+
+                    )
+
+    def __str__(self):
+        return self.full_name
+
+
+class EmployeeImage(models.Model):
+    employee = models.ForeignKey(
+        EmployeeProfile,
+        on_delete=models.CASCADE,
+        related_name='images'
+    )
+    image = models.ImageField(upload_to='employee_images/', blank=True, null=True)
+    order_index = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order_index']
+
+    @property
+
+    def tenure_days(self):
+
+        from datetime import date
+
+        today = date.today()
+
+        if self.hire_date:
+
+            return (today - self.hire_date).days
+
+        return 0
+
+
+    def clean(self):
+
+        super().clean()
+
+        # Если стол не указан — валидацию не делаем
+
+        if not self.desk_number:
+
+            return
+
+
+
+        def is_tester(e):
+
+            return e.role == "tester"
+
+
+
+        def is_dev(e):
+
+            return e.role in ["backend", "frontend", "fullstack"]
+
+
+
+        current_is_tester = is_tester(self)
+
+        current_is_dev = is_dev(self)
+
+
+
+        others = EmployeeProfile.objects.exclude(pk=self.pk).filter(desk_number__isnull=False)
+
+        for other in others:
+
+            other_is_tester = is_tester(other)
+
+            other_is_dev = is_dev(other)
+
+
+
+            if (current_is_tester and other_is_dev) or (current_is_dev and other_is_tester):
+
+                if abs(self.desk_number - other.desk_number) <= 1:
+
+                    raise ValidationError(
+
+                        f"Нельзя сажать тестировщика и разработчика за соседние столы. "
+
+                        f"Конфликт со столом {other.desk_number} ({other.full_name})."
+
+                    )
+
+    def __str__(self):
+        return f"{self.employee.full_name} — фото #{self.order_index}"

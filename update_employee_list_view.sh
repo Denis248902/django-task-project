@@ -1,3 +1,9 @@
+#!/usr/bin/env bash
+set -e
+
+FILE="emp_app/views.py"
+
+cat > "$FILE.tmp" << 'PYEOF'
 import csv
 from io import StringIO
 from django.http import HttpResponse, JsonResponse
@@ -118,3 +124,7 @@ def employee_report(request):
     import json
     data = json.loads(stats_response.content.decode('utf-8'))
     return render(request, 'emp_app/report.html', data)
+PYEOF
+
+mv "$FILE.tmp" "$FILE"
+echo "✅ employee_list view обновлён с total_employees и latest_4"

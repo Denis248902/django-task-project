@@ -2,6 +2,38 @@
 
 {% block content %}
 <h1>Сотрудники</h1>
+<p>Всего сотрудников: {{ total_employees }}</p>
+
+<h2>4 последних по дате приёма</h2>
+
+<div class="latest-cards">
+
+  {% for emp in latest_4 %}
+
+    <div class="card">
+
+      <h3>{{ emp.full_name }}</h3>
+
+      <p>Должность: {{ emp.position }}</p>
+
+      {% if emp.images.first %}
+
+        <img src="{{ emp.images.first.image.url }}" alt="Photo" style="max-width:100px;">
+
+      {% else %}
+
+        <span style="color:#999;">Нет фото</span>
+
+      {% endif %}
+
+      <p>Стаж: {{ emp.tenure_days }} дн.</p>
+
+    </div>
+
+  {% endfor %}
+
+</div>
+
 
 <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
   <!-- Поиск -->

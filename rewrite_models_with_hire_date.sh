@@ -1,3 +1,15 @@
+#!/usr/bin/env bash
+set -e
+
+FILE="emp_app/models.py"
+TMPFILE="emp_app/models.py.tmp"
+
+# Читаем весь файл в переменную
+CONTENT=$(cat "$FILE")
+
+# Заменяем фрагмент класса EmployeeProfile на исправленную версию
+# Мы явно прописываем весь класс с нужным полем hire_date
+cat > "$TMPFILE" << 'PYEOF'
 from django.db import models
 from django.core.exceptions import ValidationError
 from datetime import date
@@ -60,14 +72,7 @@ class EmployeeProfile(models.Model):
                         f"Нельзя сажать тестировщика и разработчика за соседние столы. "
                         f"Конфликт со столом {other.desk_number} ({other.full_name})."
                     )
+PYEOF
 
-class EmployeeImage(models.Model):
-    employee = models.ForeignKey(EmployeeProfile, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='employee_photos/', null=True, blank=True)
-    order_index = models.PositiveIntegerField(default=0, help_text="Порядок фото в галерее")
-
-    def __str__(self):
-        return f"Фото {self.employee.full_name} (порядок {self.order_index})"
-
-    class Meta:
-        ordering = ['order_index']
+mv "$TMPFILE" "$FILE"
+echo "✅ models.py перезаписан с корректным hire_date"

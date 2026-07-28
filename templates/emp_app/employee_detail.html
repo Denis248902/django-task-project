@@ -19,7 +19,33 @@
 {% endif %}
 
 <h1>{{ employee.full_name }}</h1>
+{% if employee.images.first %}
+
+  <img src="{{ employee.images.first.image.url }}" alt="Main photo" style="max-width:200px; border:1px solid #ccc;">
+
+{% else %}
+
+  <span style="color:#999;">Нет заглавного фото</span>
+
+{% endif %}
+
 <p><strong>Должность:</strong> {{ employee.position }}</p>
+<p><strong>Пол:</strong> {{ employee.get_gender_display }}</p>
+
+<p><strong>Навыки:</strong>
+
+  {% for skill in employee.skills %}
+
+    {{ skill.name }} (уровень {{ skill.level }}),
+
+  {% endfor %}
+
+</p>
+
+<p><strong>Стаж в компании:</strong> {{ employee.tenure_days }} дней</p>
+
+<p><strong>Номер стола:</strong> {{ employee.desk_number|default:"не назначен" }}</p>
+
 <p><strong>Пол:</strong> {% if employee.gender == 'M' %}Мужской{% else %}Женский{% endif %}</p>
 
 <h2>Фотографии</h2>
@@ -52,3 +78,7 @@
 
 <a href="{% url 'employee_list' %}" class="btn">Назад к списку</a>
 {% endblock %}
+<h3>Галерея (кроме заглавного)</h3>
+{% for img in employee.images.all|slice:"1:" %}
+  <img src="{{ img.image.url }}" alt="Photo {{ forloop.counter }}" style="max-width:150px; margin:4px;">
+{% endfor %}
